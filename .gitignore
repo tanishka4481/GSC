@@ -1,7 +1,63 @@
+# =============================================================================
+# PROVCHAIN .gitignore
+# =============================================================================
+
+# --- Secrets ---
 .env
+*.pem
+*.key
+serviceAccountKey.json
+
+# --- Python ---
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# --- Node / Frontend ---
 node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.next/
+
+# --- Firebase ---
 .firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- Testing ---
+.coverage
+htmlcov/
+.pytest_cache/
+
+# --- Misc ---
+*.log
+*.ots
 AGENTS.md
 CONTEXT.md
+Artifacts/
