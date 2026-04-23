@@ -79,6 +79,17 @@ class Settings(BaseSettings):
     RATE_LIMIT_WINDOW_SECONDS: int = 60
 
     # -------------------------------------------------------------------------
+    # Gemini Embedding
+    # -------------------------------------------------------------------------
+    GEMINI_EMBEDDING_MODEL: str = "gemini-embedding-2"
+    GEMINI_EMBEDDING_DIMENSIONS: int = 768
+
+    # -------------------------------------------------------------------------
+    # Upload Limits
+    # -------------------------------------------------------------------------
+    MAX_UPLOAD_SIZE_MB: int = 100
+
+    # -------------------------------------------------------------------------
     # Match Decision Thresholds
     # -------------------------------------------------------------------------
     # These control match_decision() — the ONLY function that flags content.

@@ -50,12 +50,26 @@ async def lifespan(app: FastAPI):
     logger.info(f"  GCP Project: {settings.GOOGLE_CLOUD_PROJECT or '(not set)'}")
     logger.info("=" * 60)
 
-    # TODO (Phase 2): Initialize Firebase Admin SDK here
-    # if settings.FIREBASE_CREDENTIALS_PATH:
-    #     import firebase_admin
-    #     from firebase_admin import credentials
-    #     cred = credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
-    #     firebase_admin.initialize_app(cred)
+    # Initialize Firebase Admin SDK (required for Firestore)
+    if settings.FIREBASE_CREDENTIALS_PATH:
+        try:
+            import firebase_admin
+            from firebase_admin import credentials as fb_credentials
+            cred = fb_credentials.Certificate(settings.FIREBASE_CREDENTIALS_PATH)
+            firebase_admin.initialize_app(cred, {
+                "projectId": settings.GOOGLE_CLOUD_PROJECT,
+            })
+            logger.info("Firebase Admin SDK initialized")
+        except ValueError:
+            # Already initialized (e.g., during hot reload)
+            logger.debug("Firebase Admin SDK already initialized")
+        except Exception as e:
+            logger.warning("Firebase init failed: %s — Firestore will be unavailable", e)
+    else:
+        logger.warning(
+            "FIREBASE_CREDENTIALS_PATH not set — Firestore will be unavailable. "
+            "Set it in .env to enable asset storage."
+        )
 
     yield  # App is running
 

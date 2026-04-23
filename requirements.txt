@@ -1,4 +1,4 @@
-# PROVCHAIN — Phase 1 Dependencies
+# PROVCHAIN — Dependencies
 # ===================================
 
 # Web framework
@@ -18,3 +18,13 @@ firebase-admin>=6.5.0
 
 # HTTP client (for external API calls)
 httpx>=0.27.0
+
+# Phase 2 — Asset Registration
+imagehash>=4.3.0              # Perceptual hashing (pHash)
+Pillow>=10.0.0                # Image processing & normalization
+google-genai>=1.0.0           # Gemini API (multimodal embeddings)
+opentimestamps-client>=0.7.0  # Bitcoin blockchain timestamping
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
