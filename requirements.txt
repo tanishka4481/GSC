@@ -28,6 +28,14 @@ opentimestamps-client>=0.7.0  # Bitcoin blockchain timestamping
 # Phase 3 — Propagation Monitoring
 numpy>=1.26.0                 # High-performance cosine similarity for embeddings
 
+# Phase 4 — Evidence Bundle Generation
+reportlab>=4.0.0              # PDF generation
+matplotlib>=3.8.0             # Propagation charts
+jinja2>=3.1.0                 # Legal notice templating
+google-api-python-client>=2.100.0  # Gmail API
+google-auth-httplib2>=0.1.0        # Google Auth HTTP
+google-auth-oauthlib>=1.0.0        # Google Auth OAuthlib
+
 # Testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0

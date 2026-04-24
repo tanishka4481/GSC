@@ -1,0 +1,27 @@
+Subject: Cease & Desist Notice - Infringement of Copyright Act, 1957 - {{ asset_id }}
+
+To Whom It May Concern,
+
+This is a formal notice under Section 51 of the Indian Copyright Act, 1957. 
+It has come to our attention that you are reproducing, distributing, and/or publicly displaying our copyrighted work without authorization.
+
+ORIGINAL WORK:
+Asset ID: {{ asset_id }}
+Cryptographic Hash (SHA-256): {{ sha256 }}
+Immutable Evidence Bundle (IPFS): {{ ipfs_cid }}
+Date of Registration: {{ created_at }}
+
+UNAUTHORIZED USAGE LOCATED AT:
+{% for url in infringing_urls %}
+- {{ url }}
+{% endfor %}
+
+We demand that you immediately cease and desist from any further unauthorized use of our work and remove the infringing material from your platforms within 24 hours. Failure to comply will result in appropriate legal action, including claims for damages under Section 55 of the Copyright Act, 1957.
+
+SENDER INFORMATION:
+Name: {{ sender_name }}
+Email: {{ sender_email }}
+Address: {{ sender_address }}
+
+Sincerely,
+{{ sender_name }}

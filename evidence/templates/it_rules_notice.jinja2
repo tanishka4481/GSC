@@ -1,0 +1,27 @@
+Subject: Notice for Takedown under Rule 3(1)(b) of the IT Rules, 2021 - {{ asset_id }}
+
+To the Grievance Officer,
+
+This notice is issued under the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021. 
+The content located at the URLs below infringes upon our copyright and intellectual property rights. As per Rule 3(1)(b), intermediaries are required to disable access to such unlawful information within 36 hours of actual knowledge.
+
+ORIGINAL WORK DETAILS:
+Asset ID: {{ asset_id }}
+SHA-256 Hash: {{ sha256 }}
+Evidence Bundle (IPFS CID): {{ ipfs_cid }}
+Registration Date: {{ created_at }}
+
+INFRINGING URL(S):
+{% for url in infringing_urls %}
+- {{ url }}
+{% endfor %}
+
+Failure to act expeditiously may result in the loss of your safe harbor protection under Section 79 of the Information Technology Act, 2000.
+
+SENDER INFORMATION:
+Name: {{ sender_name }}
+Email: {{ sender_email }}
+Address: {{ sender_address }}
+
+Regards,
+{{ sender_name }}

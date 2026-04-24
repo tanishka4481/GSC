@@ -108,6 +108,15 @@ class Settings(BaseSettings):
     GOOGLE_SEARCH_RESULTS_PER_QUERY: int = 10  # Results per CSE query (max 10)
     GOOGLE_SEARCH_DAILY_QUOTA: int = 100   # Free tier daily limit
 
+    # -------------------------------------------------------------------------
+    # Evidence Engine (Phase 4)
+    # -------------------------------------------------------------------------
+    GMAIL_CREDENTIALS_PATH: str = "credentials.json"
+    GMAIL_TOKEN_PATH: str = "token.json"
+    NOTICE_SENDER_NAME: str = "PROVCHAIN Legal Team"
+    NOTICE_SENDER_EMAIL: str = "legal@provchain.local"
+    NOTICE_SENDER_ADDRESS: str = "123 Innovation Drive, Bengaluru, KA 560001, India"
+
 
 @lru_cache()
 def get_settings() -> Settings:

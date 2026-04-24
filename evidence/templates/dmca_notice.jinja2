@@ -1,0 +1,29 @@
+Subject: Notice of Copyright Infringement (DMCA) - {{ asset_id }}
+
+Dear Designated Copyright Agent,
+
+I, the undersigned, state UNDER PENALTY OF PERJURY that:
+1. I am the owner, or an agent authorized to act on behalf of the owner, of certain intellectual property rights.
+2. I have a good faith belief that the material identified below is not authorized by the copyright owner, its agent, or the law.
+3. The information in this notice is accurate.
+
+Please act expeditiously to remove or disable access to the infringing material.
+
+ORIGINAL WORK:
+Asset ID: {{ asset_id }}
+SHA-256: {{ sha256 }}
+IPFS Evidence Bundle CID: {{ ipfs_cid }}
+Registered Date: {{ created_at }}
+
+INFRINGING MATERIAL LOCATED AT:
+{% for url in infringing_urls %}
+- {{ url }}
+{% endfor %}
+
+SENDER INFORMATION:
+Name: {{ sender_name }}
+Email: {{ sender_email }}
+Address: {{ sender_address }}
+
+Sincerely,
+{{ sender_name }}
