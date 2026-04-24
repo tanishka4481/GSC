@@ -25,6 +25,9 @@ Pillow>=10.0.0                # Image processing & normalization
 google-genai>=1.0.0           # Gemini API (multimodal embeddings)
 opentimestamps-client>=0.7.0  # Bitcoin blockchain timestamping
 
+# Phase 3 — Propagation Monitoring
+numpy>=1.26.0                 # High-performance cosine similarity for embeddings
+
 # Testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0

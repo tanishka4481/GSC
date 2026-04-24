@@ -99,6 +99,15 @@ class Settings(BaseSettings):
     EMBEDDING_POSSIBLE_MATCH: float = 0.75
     DMCA_MIN_URLS: int = 2
 
+    # -------------------------------------------------------------------------
+    # Monitoring — Propagation Scanner (Phase 3)
+    # -------------------------------------------------------------------------
+    SCAN_MAX_CANDIDATES: int = 10          # Max candidate URLs to process per scan
+    SCAN_IMAGE_DOWNLOAD_TIMEOUT: float = 10.0  # Seconds to wait for image download
+    ALERT_RISK_THRESHOLD: float = 0.7      # Risk score above which alert is triggered
+    GOOGLE_SEARCH_RESULTS_PER_QUERY: int = 10  # Results per CSE query (max 10)
+    GOOGLE_SEARCH_DAILY_QUOTA: int = 100   # Free tier daily limit
+
 
 @lru_cache()
 def get_settings() -> Settings:
