@@ -40,15 +40,15 @@ const Sidebar = () => {
           <Upload size={20} />
           <span style={{ fontWeight: 500 }}>Register Asset</span>
         </NavLink>
-        
-        <div style={{ margin: '20px 0 10px 16px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em', fontWeight: 600 }}>
-          Evidence Management
-        </div>
 
-        <NavLink 
-          to="/asset/demo-123" 
+        <p style={{ color: 'var(--text-secondary)', margin: '14px 12px 2px', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Evidence Management
+        </p>
+
+        <NavLink
+          to="/scans"
           style={({isActive}) => ({
-            display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', 
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px',
             borderRadius: 'var(--border-radius-sm)',
             color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
             background: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
@@ -59,10 +59,10 @@ const Sidebar = () => {
           <span style={{ fontWeight: 500 }}>Asset Scans</span>
         </NavLink>
 
-        <NavLink 
-          to="/evidence/demo-123" 
+        <NavLink
+          to="/bundles"
           style={({isActive}) => ({
-            display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', 
+            display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px',
             borderRadius: 'var(--border-radius-sm)',
             color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
             background: isActive ? 'rgba(255, 255, 255, 0.05)' : 'transparent',

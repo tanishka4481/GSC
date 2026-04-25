@@ -2,10 +2,13 @@ import React, { useState, useRef } from 'react';
 import { UploadCloud, Image as ImageIcon, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const OWNER_ID = 'demo-user';
+
 const Register = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -20,28 +23,41 @@ const Register = () => {
     if (!file) return;
 
     setUploading(true);
+    setError('');
     
     // Create FormData for the API
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('publisher_id', 'pub_ind_exp_001'); // Mock publisher ID
+    formData.append('owner_id', OWNER_ID);
 
     try {
-      // In a real scenario, this connects to the FastAPI backend running locally or Cloud Run
-      // const response = await fetch('http://localhost:8000/api/v1/register', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
+      const response = await fetch('/api/v1/register', {
+        method: 'POST',
+        body: formData,
+      });
       
-      // Mocking network delay for demo
-      await new Promise(r => setTimeout(r, 2000));
+      const data = await response.json();
+
+      if (!response.ok) {
+        let errMsg = data?.message || 'Registration failed';
+        if (typeof data?.detail === 'string') {
+          errMsg = data.detail;
+        } else if (data?.detail && typeof data.detail === 'object' && data.detail.existing_asset_id) {
+          errMsg = `Duplicate asset! Already registered with ID: ${data.detail.existing_asset_id}`;
+        }
+        throw new Error(errMsg);
+      }
+
+      if (!data?.asset_id) {
+        throw new Error('Registration succeeded but no asset_id was returned');
+      }
       
       setSuccess(true);
       setTimeout(() => {
-        navigate('/asset/demo-123');
+        navigate(`/asset/${data.asset_id}`);
       }, 1500);
     } catch (error) {
-      console.error("Registration failed", error);
+      setError(error.message || 'Registration failed');
     } finally {
       setUploading(false);
     }
@@ -128,6 +144,11 @@ const Register = () => {
               )}
             </button>
           </div>
+          {error && (
+            <p style={{ color: 'var(--danger)', marginTop: '14px', marginBottom: 0 }}>
+              {error}
+            </p>
+          )}
         </form>
       )}
     </div>

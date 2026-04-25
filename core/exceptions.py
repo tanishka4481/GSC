@@ -61,8 +61,8 @@ class ProvchainError(Exception):
 class ConfigurationError(ProvchainError):
     """Missing environment variables, bad config values, etc."""
 
-    def __init__(self, message: str = "Configuration error", **kwargs):
-        super().__init__(message=message, status_code=500, **kwargs)
+    def __init__(self, message: str = "Configuration error", status_code: int = 500, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 # =============================================================================
@@ -72,8 +72,8 @@ class ConfigurationError(ProvchainError):
 class RegistrationError(ProvchainError):
     """Base error for asset registration failures."""
 
-    def __init__(self, message: str = "Registration failed", **kwargs):
-        super().__init__(message=message, status_code=400, **kwargs)
+    def __init__(self, message: str = "Registration failed", status_code: int = 400, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 class HashingError(RegistrationError):
@@ -104,8 +104,8 @@ class TimestampError(RegistrationError):
 class MonitoringError(ProvchainError):
     """Base error for scan/propagation failures."""
 
-    def __init__(self, message: str = "Monitoring failed", **kwargs):
-        super().__init__(message=message, status_code=500, **kwargs)
+    def __init__(self, message: str = "Monitoring failed", status_code: int = 500, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 class ScanError(MonitoringError):
@@ -129,8 +129,8 @@ class PropagationAnalysisError(MonitoringError):
 class EvidenceError(ProvchainError):
     """Base error for evidence generation failures."""
 
-    def __init__(self, message: str = "Evidence generation failed", **kwargs):
-        super().__init__(message=message, status_code=500, **kwargs)
+    def __init__(self, message: str = "Evidence generation failed", status_code: int = 500, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 class PDFGenerationError(EvidenceError):
@@ -154,19 +154,19 @@ class NoticeGenerationError(EvidenceError):
 class StorageError(ProvchainError):
     """Firestore or IPFS read/write failed."""
 
-    def __init__(self, message: str = "Storage operation failed", **kwargs):
-        super().__init__(message=message, status_code=503, **kwargs)
+    def __init__(self, message: str = "Storage operation failed", status_code: int = 503, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 class AuthenticationError(ProvchainError):
     """Firebase Auth token validation failed."""
 
-    def __init__(self, message: str = "Authentication failed", **kwargs):
-        super().__init__(message=message, status_code=401, **kwargs)
+    def __init__(self, message: str = "Authentication failed", status_code: int = 401, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)
 
 
 class RateLimitError(ProvchainError):
     """Request rate limit exceeded."""
 
-    def __init__(self, message: str = "Rate limit exceeded", **kwargs):
-        super().__init__(message=message, status_code=429, **kwargs)
+    def __init__(self, message: str = "Rate limit exceeded", status_code: int = 429, **kwargs):
+        super().__init__(message=message, status_code=status_code, **kwargs)

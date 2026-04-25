@@ -3,13 +3,104 @@ import { Link } from 'react-router-dom';
 import { Activity, ShieldAlert, FileText, UploadCloud, ArrowRight } from 'lucide-react';
 import DomainRiskBadge from '../components/DomainRiskBadge';
 
+const OWNER_ID = 'demo-user';
+
+const toRelativeTime = (iso) => {
+  if (!iso) return 'Unknown';
+  const now = Date.now();
+  const ts = new Date(iso).getTime();
+  if (Number.isNaN(ts)) return 'Unknown';
+
+  const diffMinutes = Math.max(1, Math.floor((now - ts) / (1000 * 60)));
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hr ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+};
+
 const Dashboard = () => {
-  const [stats, setStats] = useState({ total: 142, flagged: 12, bundles: 5 });
-  const [recentScans, setRecentScans] = useState([
-    { id: 'scan-1', asset: 'Election_Coverage_Main.mp4', domains: 5, highestRisk: 80, time: '2 hours ago' },
-    { id: 'scan-2', asset: 'Editorial_OpEd_Image.png', domains: 2, highestRisk: 45, time: '5 hours ago' },
-    { id: 'scan-3', asset: 'Market_Report_Q3.pdf', domains: 0, highestRisk: 0, time: '1 day ago' },
-  ]);
+  const [stats, setStats] = useState({ total: 0, flagged: 0, bundles: 0 });
+  const [recentScans, setRecentScans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const [assetsRes, alertsRes] = await Promise.all([
+          fetch(`/api/v1/assets?owner_id=${encodeURIComponent(OWNER_ID)}`),
+          fetch(`/api/v1/alerts?owner_id=${encodeURIComponent(OWNER_ID)}`),
+        ]);
+
+        const assetsData = await assetsRes.json();
+        const alertsData = await alertsRes.json();
+
+        if (!assetsRes.ok) {
+          throw new Error(assetsData?.detail || 'Failed to fetch assets');
+        }
+        if (!alertsRes.ok) {
+          throw new Error(alertsData?.detail || 'Failed to fetch alerts');
+        }
+
+        const assets = Array.isArray(assetsData) ? assetsData : [];
+        const alerts = Array.isArray(alertsData) ? alertsData : [];
+
+        const scanRows = await Promise.all(
+          assets.slice(0, 8).map(async (asset) => {
+            try {
+              const historyRes = await fetch(`/api/v1/scan/${asset.asset_id}/history`);
+              const historyData = await historyRes.json();
+
+              const latest = historyRes.ok && Array.isArray(historyData) && historyData.length > 0
+                ? historyData[0]
+                : null;
+
+              const highestRisk = latest
+                ? Math.round((latest.risk_score || 0) * 100)
+                : 0;
+
+              return {
+                id: latest?.scan_id || asset.asset_id,
+                assetId: asset.asset_id,
+                asset: asset.filename || asset.asset_id,
+                domains: latest?.metrics?.unique_domains || 0,
+                highestRisk,
+                time: latest?.created_at ? toRelativeTime(latest.created_at) : toRelativeTime(asset.created_at),
+              };
+            } catch {
+              return {
+                id: asset.asset_id,
+                assetId: asset.asset_id,
+                asset: asset.filename || asset.asset_id,
+                domains: 0,
+                highestRisk: 0,
+                time: toRelativeTime(asset.created_at),
+              };
+            }
+          })
+        );
+
+        setRecentScans(scanRows);
+        setStats({
+          total: assets.length,
+          flagged: alerts.filter((alert) => !alert.acknowledged).length,
+          bundles: assets.filter((asset) => Boolean(asset.ipfs_cid)).length,
+        });
+      } catch (e) {
+        setError(e.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   return (
     <div>
@@ -56,6 +147,7 @@ const Dashboard = () => {
       </div>
 
       <h2 style={{ fontSize: '1.4rem', marginBottom: '16px', color: 'var(--text-primary)' }}>Recent Scan Activity</h2>
+      {error && <p style={{ color: 'var(--danger)' }}>{error}</p>}
       <div className="table-container glass-panel">
         <table>
           <thead>
@@ -68,19 +160,33 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {recentScans.map((scan) => (
-              <tr key={scan.id}>
-                <td style={{ fontWeight: 500 }}>{scan.asset}</td>
-                <td>{scan.domains} matches</td>
-                <td><DomainRiskBadge riskScore={scan.highestRisk} /></td>
-                <td style={{ color: 'var(--text-secondary)' }}>{scan.time}</td>
-                <td>
-                  <Link to={`/asset/demo-123`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
-                    View Report <ArrowRight size={14} />
-                  </Link>
+            {loading ? (
+              <tr>
+                <td colSpan={5} style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '18px' }}>
+                  Loading dashboard data...
                 </td>
               </tr>
-            ))}
+            ) : recentScans.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '18px' }}>
+                  No assets found for this owner yet.
+                </td>
+              </tr>
+            ) : (
+              recentScans.map((scan) => (
+                <tr key={scan.id}>
+                  <td style={{ fontWeight: 500 }}>{scan.asset}</td>
+                  <td>{scan.domains} matches</td>
+                  <td><DomainRiskBadge riskScore={scan.highestRisk} /></td>
+                  <td style={{ color: 'var(--text-secondary)' }}>{scan.time}</td>
+                  <td>
+                    <Link to={`/asset/${scan.assetId}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
+                      View Report <ArrowRight size={14} />
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

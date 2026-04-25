@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 from core.exceptions import StorageError
+from core.config import get_settings
 from registration.registry import get_asset
 from evidence.pdf_builder import build_registration_certificate, build_match_report
 from evidence.chart_builder import build_propagation_chart
@@ -49,7 +50,8 @@ async def generate_evidence_bundle(asset_id: str, scan_id: str, jurisdiction: st
     # Actually, we need to construct the report from the scan record.
     # For now, let's just fetch the scan record from firestore.
     from firebase_admin import firestore
-    db = firestore.client()
+    settings = get_settings()
+    db = firestore.client(database_id=settings.FIRESTORE_DATABASE_ID)
     scan_doc = db.collection("scans").document(scan_id).get()
     if not scan_doc.exists:
         raise ValueError(f"Scan not found: {scan_id}")

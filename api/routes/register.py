@@ -7,17 +7,47 @@ Hash → Fingerprint (pHash + Gemini) → Timestamp (Bitcoin) → IPFS → Fires
 
 import logging
 
-from fastapi import APIRouter, File, Form, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse
 
 from core.config import get_settings
-from core.exceptions import RegistrationError
+from core.exceptions import RegistrationError, StorageError
 from registration.models import RegisterResponse, SUPPORTED_CONTENT_TYPES
+from registration.registry import get_asset as _get_asset
+from registration.registry import get_assets_by_owner as _get_assets_by_owner
 from registration.registry import register_asset as _register_asset
 
 logger = logging.getLogger("provchain.routes.register")
 
 router = APIRouter(tags=["Registration"])
+
+
+@router.get("/assets")
+async def get_assets(
+    owner_id: str = Query(..., description="Owner identifier (Firebase UID or demo-user)"),
+):
+    """List assets for a specific owner."""
+    try:
+        assets = _get_assets_by_owner(owner_id)
+        return [asset.model_dump() for asset in assets]
+    except StorageError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/assets/{asset_id}")
+async def get_asset(asset_id: str):
+    """Fetch asset metadata for a specific asset ID."""
+    try:
+        asset = _get_asset(asset_id)
+        return asset.model_dump()
+    except RegistrationError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except StorageError as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @router.post("/register", response_model=RegisterResponse)

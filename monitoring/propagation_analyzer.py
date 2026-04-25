@@ -47,6 +47,13 @@ from monitoring.models import (
 logger = logging.getLogger("provchain.propagation_analyzer")
 
 
+def _get_db():
+    """Get Firestore client for configured database ID."""
+    from firebase_admin import firestore
+    settings = get_settings()
+    return firestore.client(database_id=settings.FIRESTORE_DATABASE_ID)
+
+
 # =============================================================================
 # match_decision() — THE ONLY function that flags content
 # =============================================================================
@@ -550,8 +557,7 @@ def _should_trigger_alert(
 async def _save_scan_record(record: ScanRecord) -> None:
     """Write scan record to Firestore 'scans' collection."""
     try:
-        from firebase_admin import firestore
-        db = firestore.client()
+        db = _get_db()
         doc_ref = db.collection("scans").document(record.scan_id)
         doc_ref.set(record.to_firestore_dict())
         logger.info("Scan record saved: scan_id=%s", record.scan_id)
@@ -620,8 +626,7 @@ async def _create_alert(
     )
 
     try:
-        from firebase_admin import firestore
-        db = firestore.client()
+        db = _get_db()
         doc_ref = db.collection("alerts").document(alert_id)
         doc_ref.set(alert.to_firestore_dict())
         logger.info(
@@ -645,8 +650,7 @@ async def _create_alert(
 def get_scan_history(asset_id: str) -> List[ScanRecord]:
     """Fetch all scan records for an asset from Firestore."""
     try:
-        from firebase_admin import firestore
-        db = firestore.client()
+        db = _get_db()
         query = (
             db.collection("scans")
             .where("asset_id", "==", asset_id)
@@ -669,8 +673,7 @@ def get_scan_history(asset_id: str) -> List[ScanRecord]:
 def get_alerts_for_owner(owner_id: str, acknowledged: Optional[bool] = None) -> List[AlertRecord]:
     """Fetch alerts for a publisher from Firestore."""
     try:
-        from firebase_admin import firestore
-        db = firestore.client()
+        db = _get_db()
         query = db.collection("alerts").where("owner_id", "==", owner_id)
 
         if acknowledged is not None:
@@ -693,8 +696,7 @@ def get_alerts_for_owner(owner_id: str, acknowledged: Optional[bool] = None) -> 
 def acknowledge_alert(alert_id: str) -> bool:
     """Mark an alert as acknowledged in Firestore."""
     try:
-        from firebase_admin import firestore
-        db = firestore.client()
+        db = _get_db()
         doc_ref = db.collection("alerts").document(alert_id)
         doc = doc_ref.get()
 

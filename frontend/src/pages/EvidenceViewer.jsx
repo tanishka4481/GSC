@@ -1,21 +1,107 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Download, Mail, FileText, CheckCircle, ExternalLink } from 'lucide-react';
 import IPFSVerifier from '../components/IPFSVerifier';
 
 const EvidenceViewer = () => {
   const { id } = useParams();
+  const [asset, setAsset] = useState(null);
+  const [loadingAsset, setLoadingAsset] = useState(true);
+  const [assetError, setAssetError] = useState('');
+
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const [downloadError, setDownloadError] = useState('');
 
-  const mockCid = 'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG';
+  useEffect(() => {
+    const fetchAsset = async () => {
+      if (!id) {
+        setAssetError('Missing asset ID.');
+        setLoadingAsset(false);
+        return;
+      }
+
+      setLoadingAsset(true);
+      setAssetError('');
+
+      try {
+        const response = await fetch(`/api/v1/assets/${id}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.detail || 'Failed to fetch asset details');
+        }
+
+        setAsset(data);
+      } catch (error) {
+        setAssetError(error.message || 'Failed to fetch asset details');
+      } finally {
+        setLoadingAsset(false);
+      }
+    };
+
+    fetchAsset();
+  }, [id]);
+
+  const handleDownloadBundle = async () => {
+    if (!id) return;
+    setDownloadError('');
+
+    try {
+      const response = await fetch(`/api/v1/evidence/${id}?download=true`);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data?.detail || data?.message || 'Evidence endpoint not ready');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `evidence_bundle_${id}.zip`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setDownloadError(error.message || 'Evidence endpoint not ready');
+    }
+  };
 
   const handleSendNotice = async () => {
+    if (!id) return;
+
     setSending(true);
-    // Mocking API call to /api/v1/notice
-    await new Promise(r => setTimeout(r, 2000));
-    setSending(false);
-    setSent(true);
+    setSendError('');
+
+    try {
+      const response = await fetch('/api/v1/notice/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          asset_id: id,
+          jurisdiction: 'dmca',
+        }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.detail || data?.message || 'Notice dispatch endpoint not ready');
+      }
+
+      setSent(Boolean(data?.dispatched));
+      if (data?.status === 'preview_only') {
+        setSendError(data?.message || 'Notice generated in preview mode.');
+      }
+    } catch (error) {
+      setSendError(error.message || 'Notice dispatch endpoint not ready');
+      setSent(false);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -24,16 +110,28 @@ const EvidenceViewer = () => {
         <div>
           <h1 style={{ fontSize: '2rem', marginBottom: '8px', color: 'var(--text-primary)' }}>Evidence Bundle</h1>
           <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            Generated for Asset: <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Election_Coverage_Main.mp4</span>
+            Generated for Asset:{' '}
+            <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>
+              {loadingAsset ? 'Loading...' : (asset?.filename || id || 'Unknown Asset')}
+            </span>
           </p>
+          {assetError && <p style={{ color: 'var(--danger)', marginTop: '8px', marginBottom: 0 }}>{assetError}</p>}
         </div>
-        <button className="btn btn-secondary">
+        <button className="btn btn-secondary" onClick={handleDownloadBundle}>
           <Download size={18} /> Download Bundle (ZIP)
         </button>
       </div>
 
+      {downloadError && <p style={{ color: 'var(--danger)', marginTop: '-16px', marginBottom: '20px' }}>{downloadError}</p>}
+
       <div style={{ marginBottom: '32px' }}>
-        <IPFSVerifier cid={mockCid} />
+        {asset?.ipfs_cid ? (
+          <IPFSVerifier cid={asset.ipfs_cid} />
+        ) : (
+          <div className="glass-panel" style={{ padding: '20px', color: 'var(--text-secondary)' }}>
+            No IPFS CID found yet for this asset.
+          </div>
+        )}
       </div>
 
       <div className="dashboard-grid">
@@ -100,7 +198,7 @@ const EvidenceViewer = () => {
             <button 
               className="btn btn-primary" 
               onClick={handleSendNotice}
-              disabled={sending}
+              disabled={sending || !id}
               style={{ padding: '12px 24px', minWidth: '180px' }}
             >
               {sending ? (
@@ -111,6 +209,8 @@ const EvidenceViewer = () => {
             </button>
           )}
         </div>
+
+        {sendError && <p style={{ color: 'var(--danger)', marginTop: '14px', marginBottom: 0 }}>{sendError}</p>}
         
         {sent && (
           <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', borderLeft: '4px solid var(--success)' }}>

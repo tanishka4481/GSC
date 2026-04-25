@@ -38,7 +38,8 @@ def _get_db():
     """
     try:
         from firebase_admin import firestore
-        return firestore.client()
+        settings = get_settings()
+        return firestore.client(database_id=settings.FIRESTORE_DATABASE_ID)
     except Exception as e:
         raise StorageError(
             message=f"Firestore client unavailable: {e}",

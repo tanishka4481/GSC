@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # Firebase
     # -------------------------------------------------------------------------
     FIREBASE_CREDENTIALS_PATH: str = ""
+    FIRESTORE_DATABASE_ID: str = "default"
 
     # -------------------------------------------------------------------------
     # IPFS (Pinata)
@@ -60,8 +61,11 @@ class Settings(BaseSettings):
     PINATA_API_URL: str = "https://api.pinata.cloud"
 
     # -------------------------------------------------------------------------
-    # Google Custom Search
+    # Search Provider (SerpApi)
     # -------------------------------------------------------------------------
+    SERPAPI_API_KEY: str = ""
+
+    # Legacy Google Custom Search settings (kept for reference/fallback)
     CUSTOM_SEARCH_API_KEY: str = ""
     CUSTOM_SEARCH_CX: str = ""
 
