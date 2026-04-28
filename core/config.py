@@ -74,8 +74,13 @@ class Settings(BaseSettings):
     # CORS
     # -------------------------------------------------------------------------
     CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:5173"]
+        default=[
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://gsc-olive.vercel.app",
+        ]
     )
+    CORS_ORIGIN_REGEX: str = r"https://.*\.vercel\.app"
 
     # -------------------------------------------------------------------------
     # Rate Limiting
