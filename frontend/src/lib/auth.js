@@ -1,4 +1,4 @@
-const AUTH_STORAGE_KEY = 'provchain_demo_user';
+export const AUTH_STORAGE_KEY = 'provchain_demo_user';
 
 export function getCurrentUser() {
   try {

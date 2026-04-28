@@ -8,7 +8,7 @@ import EvidenceViewer from './pages/EvidenceViewer';
 import AssetScans from './pages/AssetScans';
 import EvidenceBundles from './pages/EvidenceBundles';
 import Login from './pages/Login';
-import { getCurrentUser } from './lib/auth';
+import { AUTH_STORAGE_KEY, getCurrentUser } from './lib/auth';
 import './index.css';
 
 function AppShell() {
