@@ -32,6 +32,7 @@ class AssetFingerprint(BaseModel):
     phash: Optional[str] = Field(None, description="Perceptual hash hex string (images only)")
     embedding: Optional[List[float]] = Field(None, description="Gemini embedding vector")
     embedding_model: Optional[str] = Field(None, description="Model used for embedding")
+    content_summary: Optional[str] = Field(None, description="Short content-derived search summary")
 
 
 # =============================================================================
@@ -73,6 +74,7 @@ class AssetRecord(BaseModel):
     phash: Optional[str] = None
     embedding: Optional[List[float]] = None
     embedding_model: Optional[str] = None
+    content_summary: Optional[str] = None
     ipfs_cid: Optional[str] = None
     ipfs_url: Optional[str] = None
     timestamp_proof: Optional[Dict[str, Any]] = None

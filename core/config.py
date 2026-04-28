@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     # Gemini API
     # -------------------------------------------------------------------------
     GEMINI_API_KEY: str = ""
+    GEMINI_VISION_MODEL: str = "gemini-2.0-flash"
 
     # -------------------------------------------------------------------------
     # Vertex AI Matching Engine

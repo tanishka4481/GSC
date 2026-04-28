@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Download, Mail, FileText, CheckCircle, ExternalLink } from 'lucide-react';
 import IPFSVerifier from '../components/IPFSVerifier';
+import { apiUrl } from '../lib/api';
 
 const EvidenceViewer = () => {
   const { id } = useParams();
@@ -26,7 +27,7 @@ const EvidenceViewer = () => {
       setAssetError('');
 
       try {
-        const response = await fetch(`/api/v1/assets/${id}`);
+        const response = await fetch(apiUrl(`/api/v1/assets/${id}`));
         const data = await response.json();
 
         if (!response.ok) {
@@ -49,7 +50,7 @@ const EvidenceViewer = () => {
     setDownloadError('');
 
     try {
-      const response = await fetch(`/api/v1/evidence/${id}?download=true`);
+      const response = await fetch(apiUrl(`/api/v1/evidence/${id}?download=true`));
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data?.detail || data?.message || 'Evidence endpoint not ready');
@@ -76,7 +77,7 @@ const EvidenceViewer = () => {
     setSendError('');
 
     try {
-      const response = await fetch('/api/v1/notice/send', {
+      const response = await fetch(apiUrl('/api/v1/notice/send'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -173,6 +173,7 @@ async def register_asset(
         phash=fingerprints.phash,
         embedding=fingerprints.embedding,
         embedding_model=fingerprints.embedding_model,
+        content_summary=fingerprints.content_summary,
         ipfs_cid=ipfs_cid,
         ipfs_url=ipfs_url,
         timestamp_proof=timestamp_proof.model_dump(),

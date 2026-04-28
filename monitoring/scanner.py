@@ -39,6 +39,7 @@ from monitoring.models import (
 from monitoring.google_search import search_web, search_images, search_news, get_quota_status
 from monitoring.wayback import check_availability
 from monitoring.domain_scorer import extract_domain_from_url
+from registration.fingerprint import generate_content_summary
 from registration.models import AssetRecord, SUPPORTED_IMAGE_TYPES
 
 logger = logging.getLogger("provchain.scanner")
@@ -85,7 +86,7 @@ async def scan_asset(asset_id: str) -> ScanRecord:
     )
 
     # --- Stage 2: Build queries ---
-    queries = _build_search_queries(asset)
+    queries = await _build_search_queries(asset, settings)
     logger.info("Built %d search queries", len(queries))
 
     # --- Stage 3: Execute searches ---
@@ -163,14 +164,14 @@ async def scan_asset(asset_id: str) -> ScanRecord:
 # Query Builder
 # =============================================================================
 
-def _build_search_queries(asset: AssetRecord) -> List[Tuple[str, str]]:
+async def _build_search_queries(asset: AssetRecord, settings) -> List[Tuple[str, str]]:
     """
     Build search queries from asset metadata.
 
     Strategy:
-        - Images: filename-based image search + reverse lookup query
+        - Images: content-derived summary search + reverse lookup query
         - Text: use content snippet for web + news search
-        - All: always include a web search with the filename
+        - All: fallback to a generic search phrase if no semantic summary is available
 
     Args:
         asset: The registered asset record.
@@ -180,20 +181,35 @@ def _build_search_queries(asset: AssetRecord) -> List[Tuple[str, str]]:
     """
     queries = []
     filename_clean = os.path.splitext(asset.filename)[0].replace("_", " ").replace("-", " ")
+    summary_query = (asset.content_summary or "").strip()
 
     if asset.content_type in SUPPORTED_IMAGE_TYPES:
-        # Image: search by filename (image search)
-        queries.append((filename_clean, "image"))
+        image_query = summary_query
 
-        # Also do a web search for the filename
-        queries.append((f'"{filename_clean}"', "web"))
+        if not image_query and asset.ipfs_url:
+            try:
+                image_bytes = await _download_image(
+                    asset.ipfs_url,
+                    timeout=settings.SCAN_IMAGE_DOWNLOAD_TIMEOUT,
+                )
+                if image_bytes:
+                    image_query = generate_content_summary(image_bytes, asset.content_type)
+            except Exception:
+                image_query = None
+
+        if not image_query:
+            image_query = "image"
+
+        queries.append((image_query, "image"))
+        queries.append((f'"{image_query}"', "web"))
 
     else:
-        # Text/PDF: search by filename and content
-        queries.append((filename_clean, "web"))
+        # Text/PDF: search by content-derived summary first, filename only as fallback.
+        text_query = summary_query or filename_clean
+        queries.append((text_query, "web"))
 
-        # News search for the filename
-        queries.append((filename_clean, "news"))
+        # News search for the same content-derived query.
+        queries.append((text_query, "news"))
 
     return queries
 
@@ -434,7 +450,13 @@ def _check_attribution(snippet: str, asset: AssetRecord) -> bool:
         if asset.owner_id.lower() in snippet_lower:
             return True
 
-    # Check for filename reference
+    # Check for content summary reference first so scans do not bias on filenames.
+    if asset.content_summary:
+        summary_clean = asset.content_summary.lower().strip()
+        if len(summary_clean) > 3 and summary_clean in snippet_lower:
+            return True
+
+    # Check for filename reference as a fallback when no summary exists.
     filename_clean = os.path.splitext(asset.filename)[0].lower().replace("_", " ").replace("-", " ")
     if len(filename_clean) > 3 and filename_clean in snippet_lower:
         return True

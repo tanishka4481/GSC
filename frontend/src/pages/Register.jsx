@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, Image as ImageIcon, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../lib/api';
 
 const OWNER_ID = 'demo-user';
 
@@ -31,7 +32,7 @@ const Register = () => {
     formData.append('owner_id', OWNER_ID);
 
     try {
-      const response = await fetch('/api/v1/register', {
+      const response = await fetch(apiUrl('/api/v1/register'), {
         method: 'POST',
         body: formData,
       });

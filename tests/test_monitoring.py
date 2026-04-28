@@ -23,6 +23,7 @@ from monitoring.propagation_analyzer import (
     _compute_metrics,
     _determine_risk_score,
 )
+from monitoring.scanner import _build_search_queries
 from monitoring.anomaly_detector import classify_anomaly
 
 
@@ -261,3 +262,47 @@ def test_classify_anomaly_normal():
     anomaly = classify_anomaly(metrics, decisions)
     assert anomaly.anomaly_type == AnomalyType.NORMAL
     assert anomaly.severity == AlertSeverity.LOW
+
+
+@pytest.mark.asyncio
+async def test_build_search_queries_uses_content_summary_for_images():
+    from registration.models import AssetRecord
+
+    asset = AssetRecord(
+        asset_id="asset-1",
+        owner_id="owner-1",
+        filename="dog.jpg",
+        content_type="image/jpeg",
+        file_size=1234,
+        sha256="a" * 64,
+        content_summary="mona lisa portrait painting",
+    )
+
+    settings = type("Settings", (), {"SCAN_IMAGE_DOWNLOAD_TIMEOUT": 10.0})()
+    queries = await _build_search_queries(asset, settings)
+
+    assert queries[0] == ("mona lisa portrait painting", "image")
+    assert queries[1] == ('"mona lisa portrait painting"', "web")
+    assert all("dog" not in query for query, _ in queries)
+
+
+@pytest.mark.asyncio
+async def test_build_search_queries_uses_content_summary_for_text_assets():
+    from registration.models import AssetRecord
+
+    asset = AssetRecord(
+        asset_id="asset-2",
+        owner_id="owner-2",
+        filename="random-name.pdf",
+        content_type="application/pdf",
+        file_size=4321,
+        sha256="b" * 64,
+        content_summary="quantum entanglement graph neural networks",
+    )
+
+    settings = type("Settings", (), {"SCAN_IMAGE_DOWNLOAD_TIMEOUT": 10.0})()
+    queries = await _build_search_queries(asset, settings)
+
+    assert queries[0] == ("quantum entanglement graph neural networks", "web")
+    assert queries[1] == ("quantum entanglement graph neural networks", "news")
+    assert all("random-name" not in query for query, _ in queries)

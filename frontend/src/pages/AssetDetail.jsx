@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Search, ShieldAlert, ArrowRight, Clock } from 'lucide-react';
 import DomainRiskBadge from '../components/DomainRiskBadge';
 import PropagationChart from '../components/PropagationChart';
+import { apiUrl } from '../lib/api';
 
 const confidenceRank = {
   HIGH_CONFIDENCE: 4,
@@ -66,7 +67,7 @@ const AssetDetail = () => {
       setAssetError('');
 
       try {
-        const response = await fetch(`/api/v1/assets/${id}`);
+        const response = await fetch(apiUrl(`/api/v1/assets/${id}`));
         const data = await response.json();
 
         if (!response.ok) {
@@ -89,7 +90,7 @@ const AssetDetail = () => {
       if (!id) return;
 
       try {
-        const response = await fetch(`/api/v1/scan/${id}/history`);
+        const response = await fetch(apiUrl(`/api/v1/scan/${id}/history`));
         const data = await response.json();
 
         if (response.ok && Array.isArray(data) && data.length > 0) {
@@ -144,7 +145,7 @@ const AssetDetail = () => {
     setScanError('');
 
     try {
-      const response = await fetch(`/api/v1/scan/${id}`, {
+      const response = await fetch(apiUrl(`/api/v1/scan/${id}`), {
         method: 'POST',
       });
 
@@ -156,7 +157,7 @@ const AssetDetail = () => {
 
       setScanResults(data);
 
-      const historyResponse = await fetch(`/api/v1/scan/${id}/history`);
+      const historyResponse = await fetch(apiUrl(`/api/v1/scan/${id}/history`));
       const historyData = await historyResponse.json();
       if (historyResponse.ok && Array.isArray(historyData) && historyData.length > 0) {
         setLatestScan(historyData[0]);

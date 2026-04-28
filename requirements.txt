@@ -24,6 +24,7 @@ imagehash>=4.3.0              # Perceptual hashing (pHash)
 Pillow>=10.0.0                # Image processing & normalization
 google-genai>=1.0.0           # Gemini API (multimodal embeddings)
 opentimestamps-client>=0.7.0  # Bitcoin blockchain timestamping
+pypdf>=5.0.0                  # PDF text extraction for search summaries
 
 # Phase 3 — Propagation Monitoring
 numpy>=1.26.0                 # High-performance cosine similarity for embeddings

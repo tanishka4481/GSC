@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, ShieldAlert, FileText, UploadCloud, ArrowRight } from 'lucide-react';
 import DomainRiskBadge from '../components/DomainRiskBadge';
+import { apiUrl } from '../lib/api';
 
 const OWNER_ID = 'demo-user';
 
@@ -34,8 +35,8 @@ const Dashboard = () => {
 
       try {
         const [assetsRes, alertsRes] = await Promise.all([
-          fetch(`/api/v1/assets?owner_id=${encodeURIComponent(OWNER_ID)}`),
-          fetch(`/api/v1/alerts?owner_id=${encodeURIComponent(OWNER_ID)}`),
+          fetch(apiUrl(`/api/v1/assets?owner_id=${encodeURIComponent(OWNER_ID)}`)),
+          fetch(apiUrl(`/api/v1/alerts?owner_id=${encodeURIComponent(OWNER_ID)}`)),
         ]);
 
         const assetsData = await assetsRes.json();
@@ -54,7 +55,7 @@ const Dashboard = () => {
         const scanRows = await Promise.all(
           assets.slice(0, 8).map(async (asset) => {
             try {
-              const historyRes = await fetch(`/api/v1/scan/${asset.asset_id}/history`);
+              const historyRes = await fetch(apiUrl(`/api/v1/scan/${asset.asset_id}/history`));
               const historyData = await historyRes.json();
 
               const latest = historyRes.ok && Array.isArray(historyData) && historyData.length > 0
