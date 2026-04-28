@@ -25,6 +25,7 @@ const Login = ({ user, onLogin }) => {
     onLogin({
       name: name.trim(),
       email: email.trim(),
+      ownerId: email.trim().toLowerCase(),
     });
   };
 

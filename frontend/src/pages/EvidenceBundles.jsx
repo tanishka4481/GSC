@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileArchive, ArrowRight } from 'lucide-react';
 import { apiUrl } from '../lib/api';
-
-const OWNER_ID = 'demo-user';
+import { getOwnerId } from '../lib/auth';
 
 const EvidenceBundles = () => {
   const [assets, setAssets] = useState([]);
@@ -14,9 +13,10 @@ const EvidenceBundles = () => {
     const fetchAssets = async () => {
       setLoading(true);
       setError('');
+      const ownerId = getOwnerId();
 
       try {
-        const response = await fetch(apiUrl(`/api/v1/assets?owner_id=${encodeURIComponent(OWNER_ID)}`));
+        const response = await fetch(apiUrl(`/api/v1/assets?owner_id=${encodeURIComponent(ownerId)}`));
         const data = await response.json();
 
         if (!response.ok) {

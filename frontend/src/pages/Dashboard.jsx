@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { Activity, ShieldAlert, FileText, UploadCloud, ArrowRight } from 'lucide-react';
 import DomainRiskBadge from '../components/DomainRiskBadge';
 import { apiUrl } from '../lib/api';
-
-const OWNER_ID = 'demo-user';
+import { getOwnerId } from '../lib/auth';
 
 const toRelativeTime = (iso) => {
   if (!iso) return 'Unknown';
@@ -32,11 +31,12 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       setLoading(true);
       setError('');
+      const ownerId = getOwnerId();
 
       try {
         const [assetsRes, alertsRes] = await Promise.all([
-          fetch(apiUrl(`/api/v1/assets?owner_id=${encodeURIComponent(OWNER_ID)}`)),
-          fetch(apiUrl(`/api/v1/alerts?owner_id=${encodeURIComponent(OWNER_ID)}`)),
+          fetch(apiUrl(`/api/v1/assets?owner_id=${encodeURIComponent(ownerId)}`)),
+          fetch(apiUrl(`/api/v1/alerts?owner_id=${encodeURIComponent(ownerId)}`)),
         ]);
 
         const assetsData = await assetsRes.json();

@@ -8,22 +8,12 @@ import EvidenceViewer from './pages/EvidenceViewer';
 import AssetScans from './pages/AssetScans';
 import EvidenceBundles from './pages/EvidenceBundles';
 import Login from './pages/Login';
+import { getCurrentUser } from './lib/auth';
 import './index.css';
-
-const AUTH_STORAGE_KEY = 'provchain_demo_user';
-
-function getStoredUser() {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
 
 function AppShell() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(() => getStoredUser());
+  const [user, setUser] = useState(() => getCurrentUser());
 
   useEffect(() => {
     if (user) {
@@ -34,7 +24,11 @@ function AppShell() {
   }, [user]);
 
   const handleLogin = (nextUser) => {
-    setUser(nextUser);
+    const normalizedUser = {
+      ...nextUser,
+      ownerId: nextUser.ownerId || nextUser.email.toLowerCase(),
+    };
+    setUser(normalizedUser);
     navigate('/');
   };
 
